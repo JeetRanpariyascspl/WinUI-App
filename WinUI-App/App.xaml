@@ -11,6 +11,9 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
+
+            <!--  Application-specific resources  -->
+            <x:String x:Key="AppTitleName">WinUI-App</x:String>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -54,9 +54,14 @@
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Text="{x:Bind Version}"/>
                         <toolkit:SettingsExpander.Items>
                             <toolkit:SettingsCard x:Name="CloneRepoCard" Click="CloneRepoCard_Click" Header="To clone this repository" IsClickEnabled="True">
-                                <TextBlock x:Name="GitCloneTextBlock" FontFamily="Consolas" Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Text="git clone http://www.exmple.com"/>
+                                <TextBlock x:Name="GitCloneTextBlock" FontFamily="Consolas" Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Text="git clone https://github.com/JeetRanpariyascspl/WinUI-App"/>
                                 <toolkit:SettingsCard.ActionIcon>
                                     <FontIcon Glyph="&#xE8C8;" />
+                                </toolkit:SettingsCard.ActionIcon>
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard x:Name="BugRequestCard" Click="CloneRepoCard_Click" Header="File a bug or request new sample" IsClickEnabled="True">
+                                <toolkit:SettingsCard.ActionIcon>
+                                    <FontIcon Glyph="&#xE8A7;" />
                                 </toolkit:SettingsCard.ActionIcon>
                             </toolkit:SettingsCard>
                         </toolkit:SettingsExpander.Items>
