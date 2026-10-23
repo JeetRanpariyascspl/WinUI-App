@@ -9,6 +9,6 @@
     mc:Ignorable="d">
 
     <Grid>
-        <TextBlock x:Name="WinUI-App"></TextBlock>
+        <TextBlock x:Name="AppTitel">WinUI-App</TextBlock>
     </Grid>
 </Page>
