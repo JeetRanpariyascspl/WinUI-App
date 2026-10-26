@@ -110,7 +110,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:28px 0 50px;colo
 </ol></section>
 
 <section id="versions"><h2>All versions</h2><p class="sub">Every release, pulled live from GitHub.</p>
-<div class="tools"><input id="q" type="search" placeholder="Search versions or notes" aria-label="Search versions"><select id="ch" aria-label="Channel"><option value="all">All releases</option><option value="s">Stable only</option><option value="p">Pre-releases only</option></select></div>
+<div class="tools"><input id="q" type="search" placeholder="Search version, notes or file name (e.g. 1.0.0)" aria-label="Search versions"><select id="ch" aria-label="Channel"><option value="all">All releases</option><option value="s">Stable only</option><option value="p">Pre-releases only</option></select><button class="btn" id="tg" type="button">Expand all</button></div>
 <div id="list"><div class="empty">Loading releases…</div></div></section>
 
 <section><h2>System requirements</h2><p class="sub">&nbsp;</p>
@@ -133,13 +133,13 @@ const m=location.hostname.match(/^([^.]+)\.github\.io$/i);if(m){const r=location
 const API=`https://api.github.com/repos/${OWNER}/${REPO}`, REPO_URL=`https://github.com/${OWNER}/${REPO}`;
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const size=b=>b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
-const day=d=>new Date(d).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
+const size=b=>!b?"source":b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
+const day=d=>!d?"":new Date(d).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
 const ver=r=>/^v?\d/.test(r.tag_name)?r.tag_name:(r.name||r.tag_name);
-let rels=[];
+let rels=[],openAll=null;
 
-const name=REPO.replace(/[-_]+/g," ");
-$$(".app").forEach(e=>e.textContent=name);document.title=`${name} – Download`;
+const appName=REPO.replace(/[-_]+/g," ");
+$$(".app").forEach(e=>e.textContent=appName);document.title=`${appName} – Download`;
 $$(".repo").forEach(a=>a.href=REPO_URL);$("#iss").href=REPO_URL+"/issues";
 $("#th").onclick=()=>{const d=matchMedia("(prefers-color-scheme: dark)").matches;const c=document.documentElement.dataset.t||(d?"dark":"light");const n=c==="dark"?"light":"dark";document.documentElement.dataset.t=n;try{localStorage.setItem("t",n)}catch(e){}};
 try{const t=localStorage.getItem("t");if(t)document.documentElement.dataset.t=t}catch(e){}
@@ -160,39 +160,47 @@ function md(src){
 }
 const wanted=a=>TYPES.some(t=>a.name.toLowerCase().endsWith(t));
 
-function top(){
+function showLatest(){
   const L=rels.find(r=>!r.prerelease)||rels[0];
   if(!L){ $("#pill").textContent="No release published yet";$("#dv").textContent="No release yet";
     $("#dm").innerHTML=`Publish one on GitHub and attach your installer. <a href="${REPO_URL}/releases/new">Create a release</a>`;
     $("#dbtn").textContent="View on GitHub";$("#dbtn").href=REPO_URL;$("#main").textContent="View on GitHub";$("#main").href=REPO_URL;return}
   const f=L.assets.find(a=>/\.(exe|msix|msixbundle|msi)$/i.test(a.name))||L.assets.find(wanted);
   const href=f?f.browser_download_url:L.html_url;
-  $("#pill").textContent=`Latest: ${ver(L)} · ${day(L.published_at)}`;
-  $("#dv").textContent=`${name} ${ver(L)}`;
-  $("#dm").textContent=f?`${f.name} · ${size(f.size)} · released ${day(L.published_at)}`:`Released ${day(L.published_at)}. Open the release page to get the files.`;
+  $("#pill").textContent=`Latest: ${ver(L)}${L.published_at?" · "+day(L.published_at):""}`;
+  $("#dv").textContent=`${appName} ${ver(L)}`;
+  $("#dm").textContent=f?f.size?`${f.name} · ${size(f.size)} · released ${day(L.published_at)}`:`${f.name} (source code)`:`Released ${day(L.published_at)}. Open the release page to get the files.`;
   $("#dbtn").textContent=f?"Download now":"Open release";$("#dbtn").href=href;
   $("#main").textContent=`Download ${ver(L)}`;$("#main").href=href;
 }
 function list(){
   const q=$("#q").value.trim().toLowerCase(),c=$("#ch").value,L=rels.find(r=>!r.prerelease)||rels[0];
   if(!rels.length){$("#list").innerHTML=`<div class="empty">No releases yet. <a href="${REPO_URL}/releases/new">Create the first one</a> and it will show up here.</div>`;return}
-  const rows=rels.filter(r=>(c==="all"||(c==="p")===!!r.prerelease)&&(!q||(r.tag_name+" "+(r.name||"")+" "+(r.body||"")).toLowerCase().includes(q)));
-  $("#list").innerHTML=rows.length?rows.map(r=>{const as=r.assets.filter(wanted);return `<details class="rel"${r===L?" open":""}>
+  const hay=r=>(r.tag_name+" "+r.tag_name.replace(/^v/i,"")+" "+(r.name||"")+" "+(r.body||"")+" "+r.assets.map(a=>a.name).join(" ")).toLowerCase();
+  const toks=q.replace(/\bv(?=\d)/g,"").split(/\s+/).filter(Boolean);
+  const rows=rels.filter(r=>(c==="all"||(c==="p")===!!r.prerelease)&&toks.every(t=>hay(r).includes(t)));
+  $("#tg").textContent=openAll===false||(openAll===null&&rels.length>5)?"Expand all":"Collapse all";
+  $("#list").innerHTML=(rows.length?`<p class="sub" style="margin:0 0 10px">${rows.length} version${rows.length>1?"s":""}</p>`:"")+(rows.length?rows.map(r=>{const as=r.assets.filter(wanted);return `<details class="rel"${(openAll===null?(rels.length<=5||r===L):openAll)?" open":""}>
   <summary><span class="v">${esc(ver(r))}</span>${r===L?'<span class="tg l">Latest</span>':""}${r.prerelease?'<span class="tg pr">Pre-release</span>':""}<span class="dt">${day(r.published_at)}</span></summary>
   <div class="rb"><div class="md">${r.body?md(r.body):"<p>No release notes.</p>"}</div>
-  <div class="as">${as.length?as.map(a=>`<div class="a"><span class="n">${esc(a.name)}</span><span class="m">${size(a.size)} · ${a.download_count||0} downloads</span><a class="btn p" href="${esc(a.browser_download_url)}">Download</a>${a.digest?`<span class="h">SHA-256: ${esc(a.digest.replace("sha256:",""))}</span>`:""}</div>`).join(""):`<div class="m">No installer attached. <a href="${esc(r.html_url)}">View on GitHub</a></div>`}</div></div></details>`}).join(""):`<div class="empty">No releases match your search.</div>`;
+  <div class="as">${as.length?as.map(a=>`<div class="a"><span class="n">${esc(a.name)}</span><span class="m">${size(a.size)} · ${a.download_count||0} downloads</span><a class="btn p" href="${esc(a.browser_download_url)}">Download</a>${a.digest?`<span class="h">SHA-256: ${esc(a.digest.replace("sha256:",""))}</span>`:""}</div>`).join(""):`<div class="m">No installer attached. <a href="${esc(r.html_url)}">View on GitHub</a></div>`}</div></div></details>`}).join(""):`<div class="empty">No versions match “${esc(q)}”. <a href="#versions" id="clr">Clear search</a></div>`);
 }
 async function load(){
   try{const r=await fetch(`${API}/releases?per_page=100`,{headers:{Accept:"application/vnd.github+json"}});
-    if(!r.ok)throw new Error(r.status);rels=(await r.json()).filter(x=>!x.draft);top();list();
+    if(!r.ok)throw new Error(r.status);rels=(await r.json()).filter(x=>!x.draft);if(rels.length){try{localStorage.setItem("rels:"+REPO,JSON.stringify(rels))}catch(e){}}
+    if(!rels.length){try{const t=await (await fetch(`${API}/tags?per_page=100`)).json();
+      rels=t.map(x=>({tag_name:x.name,name:x.name,prerelease:/-(alpha|beta|rc|preview)/i.test(x.name),published_at:null,body:"Tag only. No release notes yet.",html_url:`${REPO_URL}/releases/tag/${x.name}`,
+        assets:[{name:`${x.name}-source.zip`,size:0,download_count:0,browser_download_url:`${REPO_URL}/archive/refs/tags/${x.name}.zip`}]}))}catch(e){}}
+    showLatest();list();
   }catch(e){
+    try{const c=JSON.parse(localStorage.getItem("rels:"+REPO)||"null");if(c&&c.length){rels=c;showLatest();list();return}}catch(x){}
     $("#pill").textContent="Releases on GitHub";$("#dv").textContent="Open the releases page";
     $("#dm").textContent="Live data could not load (GitHub may be limiting requests). Try again in a few minutes.";
     $("#dbtn").textContent="Go to releases";$("#dbtn").href=REPO_URL+"/releases";$("#main").textContent="Go to releases";$("#main").href=REPO_URL+"/releases";
     $("#list").innerHTML=`<div class="empty">Couldn’t load the list. <a href="${REPO_URL}/releases">See releases on GitHub</a></div>`;
   }
 }
-$("#q").oninput=list;$("#ch").onchange=list;
+document.addEventListener("click",e=>{if(e.target.id==="clr"){e.preventDefault();$("#q").value="";$("#ch").value="all";list()}});$("#tg").onclick=()=>{const all=$$(".rel");const open=[...all].some(d=>!d.open);openAll=open;list()};["input","keyup","search"].forEach(ev=>$("#q").addEventListener(ev,list));$("#ch").onchange=list;
 fetch(API).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.description)$("#tag").textContent=d.description}).catch(()=>{});
 load();
 </script>
