@@ -27,5 +27,15 @@ namespace WinUI_App.Pages
         {
             InitializeComponent();
         }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            App.MainWindow.NavigateToSettings();
+        }
+
+        private void ShowTipButton_Click(object sender, RoutedEventArgs e)
+        {
+            TipInfoBar.IsOpen = true;
+        }
     }
 }

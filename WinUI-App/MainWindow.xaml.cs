@@ -33,6 +33,17 @@ namespace WinUI_App
         {
             InitializeComponent();
             SetWindowProperties();
+            NavigationViewControl.SelectedItem = Home;
+            rootFrame.Navigate(typeof(HomePage));
+        }
+
+        public void NavigateToSettings()
+        {
+            NavigationViewControl.SelectedItem = NavigationViewControl.SettingsItem;
+            if (rootFrame.CurrentSourcePageType != typeof(SettingsPage))
+            {
+                rootFrame.Navigate(typeof(SettingsPage));
+            }
         }
 
         private void SetWindowProperties()

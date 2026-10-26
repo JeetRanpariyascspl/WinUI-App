@@ -8,7 +8,105 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock x:Name="AppTitel">WinUI-App</TextBlock>
-    </Grid>
+    <Page.Resources>
+        <LinearGradientBrush x:Key="HeroBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="#665D5FEF" />
+            <GradientStop Offset="0.52" Color="#525B49C8" />
+            <GradientStop Offset="1" Color="#3B1277A7" />
+        </LinearGradientBrush>
+
+        <Style x:Key="QuickActionStyle" TargetType="Button">
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="MinWidth" Value="210" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid MaxWidth="1200" Margin="36,28,36,48">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="24" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" MinHeight="226" Padding="32" CornerRadius="20" Background="{StaticResource HeroBackgroundBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Spacing="10">
+                        <TextBlock Text="YOUR SPACE, YOUR WAY" FontSize="12" FontWeight="SemiBold" CharacterSpacing="80" Opacity="0.8" />
+                        <TextBlock Text="Welcome to WinUI-App" Style="{StaticResource DisplayTextBlockStyle}" />
+                        <TextBlock Text="A thoughtful starting point for the work that matters today." FontSize="18" Opacity="0.88" TextWrapping="Wrap" />
+                        <Button Click="SettingsButton_Click" Margin="0,14,0,0" HorizontalAlignment="Left" Style="{StaticResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE713;" />
+                                <TextBlock Text="Explore settings" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="112" Height="112" CornerRadius="56" Background="#26FFFFFF" VerticalAlignment="Center" Margin="28,0,6,0">
+                        <FontIcon Glyph="&#xE77B;" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Spacing="14">
+                    <TextBlock Text="Start here" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Everything you need is close at hand." Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Style="{StaticResource QuickActionStyle}" Click="SettingsButton_Click">
+                            <StackPanel Spacing="8">
+                                <FontIcon Glyph="&#xE713;" FontSize="24" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                <TextBlock Text="Personalize" FontWeight="SemiBold" />
+                                <TextBlock Text="Choose a theme and navigation style." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2" Style="{StaticResource QuickActionStyle}" Click="ShowTipButton_Click">
+                            <StackPanel Spacing="8">
+                                <FontIcon Glyph="&#xE945;" FontSize="24" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                                <TextBlock Text="Get inspired" FontWeight="SemiBold" />
+                                <TextBlock Text="Discover small ways to make the app yours." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <Border Grid.Column="2" Padding="20" CornerRadius="14" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                    <StackPanel Spacing="14">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <FontIcon Glyph="&#xE9D9;" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                            <TextBlock Text="At a glance" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Ready when you are" FontSize="16" FontWeight="SemiBold" />
+                            <TextBlock Text="Your workspace is set up and ready for your next idea." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <Button Content="Learn more" Click="ShowTipButton_Click" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <StackPanel Grid.Row="4" Spacing="12">
+                <TextBlock Text="Helpful tip" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <InfoBar x:Name="TipInfoBar" IsOpen="True" IsClosable="False" Severity="Informational" Title="Make it feel like home" Message="Use Settings to switch between light, dark, or system theme whenever you like." />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Page>
