@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WinUI App – Download</title>
+<meta name="description" content="A Windows desktop app built with WinUI 3 and .NET 10. Download the latest release or browse every version.">
+<style>
+:root{--bg:#0e1118;--bg2:#141925;--card:#181e2c;--line:#262e42;--text:#eaeefa;--mut:#9aa6c2;--acc:#4da3ff;--acc2:#7c8cff;--ink:#07101f;--ok:#3ccf9a;--warn:#f0b050;color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-t="dark"]){--bg:#f4f6fb;--bg2:#e9edf6;--card:#fff;--line:#d9dfec;--text:#141a28;--mut:#56617a;--acc:#0b63d1;--acc2:#4a56d6;--ink:#fff;--ok:#0f8a62;--warn:#a35b00;color-scheme:light}}
+:root[data-t="light"]{--bg:#f4f6fb;--bg2:#e9edf6;--card:#fff;--line:#d9dfec;--text:#141a28;--mut:#56617a;--acc:#0b63d1;--acc2:#4a56d6;--ink:#fff;--ok:#0f8a62;--warn:#a35b00;color-scheme:light}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif}
+a{color:var(--acc)}:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.w{max-width:1040px;margin:0 auto;padding:0 22px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+.brand{display:flex;gap:10px;align-items:center;font-weight:700;color:var(--text);text-decoration:none}
+.lg{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:7px}
+.lg i{background:#fff;border-radius:2px}
+nav{display:flex;gap:18px;align-items:center}nav a{color:var(--mut);text-decoration:none;font-size:.95rem}nav a:hover{color:var(--text)}
+nav button{background:none;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:4px 10px;cursor:pointer;font:inherit}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:54px 0 46px}
+.pill{display:inline-block;font-size:.85rem;color:var(--mut);border:1px solid var(--line);border-radius:99px;padding:3px 12px;margin-bottom:16px;background:var(--bg2)}
+h1{font-size:clamp(2.3rem,6vw,3.8rem);line-height:1.05;letter-spacing:-.03em;margin:0 0 16px}
+.lead{color:var(--mut);font-size:1.12rem;max-width:44ch;margin:0 0 26px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--text);text-decoration:none;font-weight:600;cursor:pointer;font-size:1rem}
+.btn.p{background:linear-gradient(135deg,var(--acc),var(--acc2));border:0;color:var(--ink)}
+.btn.p{color:#fff}.btn:hover{filter:brightness(1.1)}
+.small{color:var(--mut);font-size:.88rem;margin-top:14px}
+.win{border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 30px 60px -30px #000a;overflow:hidden}
+.wb{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;background:var(--bg2);font-size:.82rem;color:var(--mut)}
+.srch{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 40px 2px 10px;font-size:.75rem}
+.wbody{display:grid;grid-template-columns:110px 1fr;min-height:230px}
+.sd{background:var(--bg2);padding:12px;display:grid;gap:9px;align-content:start;font-size:.78rem;color:var(--mut)}
+.sd b{background:var(--acc);color:#fff;border-radius:6px;padding:4px 8px;font-weight:600}.sd span{padding:4px 8px}
+.mn{padding:18px;display:grid;gap:10px;align-content:start}
+.mn div{height:12px;border-radius:6px;background:var(--bg2)}.mn div:first-child{height:20px;width:50%;background:var(--line)}
+section{padding:38px 0}
+h2{font-size:1.7rem;letter-spacing:-.02em;margin:0 0 6px}.sub{color:var(--mut);margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.f{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.f h3{margin:0 0 4px;font-size:1.02rem}.f p{margin:0;color:var(--mut);font-size:.93rem}
+.dl{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.dl h3{margin:0 0 4px;font-size:1.3rem}.dl p{margin:0;color:var(--mut)}
+.steps{counter-reset:s;display:grid;gap:10px;padding:0;list-style:none;margin:0}
+.steps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px 12px 52px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:14px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.tools input,.tools select{font:inherit;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--text)}.tools input{flex:1;min-width:180px}
+.rel{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.rel summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:15px 18px}
+.rel summary::-webkit-details-marker{display:none}.rel summary::before{content:"▸";color:var(--mut);transition:transform .15s}.rel[open] summary::before{transform:rotate(90deg)}
+.v{font-weight:700;font-size:1.08rem}.tg{font-size:.75rem;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}
+.tg.l{background:var(--ok);border-color:var(--ok);color:#fff}.tg.pr{color:var(--warn);border-color:var(--warn)}
+.dt{margin-left:auto;color:var(--mut);font-size:.88rem}
+.rb{padding:2px 18px 18px;border-top:1px solid var(--line)}
+.md{font-size:.95rem;margin:12px 0}.md h2,.md h3,.md h4{font-size:1.05rem;margin:14px 0 4px;letter-spacing:0}
+.md ul{margin:4px 0;padding-left:22px}.md p{margin:6px 0}.md code,.md pre{background:var(--bg2);border-radius:6px;font:.85rem ui-monospace,Consolas,monospace}.md code{padding:1px 5px}.md pre{padding:10px;overflow-x:auto}
+.as{display:grid;gap:8px}.a{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--bg2);border-radius:9px;padding:10px 14px}
+.a .n{font-weight:600;word-break:break-all}.a .m{color:var(--mut);font-size:.84rem}.a .btn{margin-left:auto;padding:7px 14px;font-size:.9rem}
+.h{width:100%;font:.76rem ui-monospace,Consolas,monospace;color:var(--mut);word-break:break-all}
+.empty{padding:26px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px}
+.sp{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));background:var(--card);border:1px solid var(--line);border-radius:12px}
+.sp div{padding:14px 18px;border-right:1px solid var(--line)}.sp div:last-child{border:0}.sp dt{color:var(--mut);font-size:.84rem}.sp dd{margin:0;font-weight:600}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 18px;margin-bottom:8px}.faq summary{cursor:pointer;font-weight:600}.faq p{margin:8px 0 0;color:var(--mut)}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:28px 0 50px;color:var(--mut);font-size:.9rem}
+@media(max-width:780px){.hero{grid-template-columns:1fr}.dl{grid-template-columns:1fr}.dt{margin-left:0;width:100%}nav a.x{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="w">
+<header class="top">
+  <a class="brand" href="#top"><span class="lg" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="app">WinUI App</span></a>
+  <nav><a class="x" href="#features">Features</a><a href="#download">Download</a><a class="x" href="#versions">Versions</a><a class="x" href="#faq">FAQ</a><a href="#" class="repo">GitHub</a><button id="th" type="button" aria-label="Switch light or dark theme">◐</button></nav>
+</header>
+<main id="top">
+<div class="hero">
+  <div>
+    <span class="pill" id="pill">Checking latest version…</span>
+    <h1 class="app">WinUI App</h1>
+    <p class="lead" id="tag">A Windows desktop app built with WinUI 3 and .NET 10, with a Mica window, title-bar search and clean navigation.</p>
+    <div class="row"><a class="btn p" id="main" href="#download">Download for Windows</a><a class="btn repo" href="#">View source</a></div>
+    <p class="small">Windows 10 (build 17763) or later · 64-bit</p>
+  </div>
+  <div class="win" aria-hidden="true">
+    <div class="wb"><span class="app">WinUI App</span><span class="srch">Search</span><b>– ▢ ✕</b></div>
+    <div class="wbody"><div class="sd"><b>Home</b><span>Settings</span></div><div class="mn"><div></div><div style="width:85%"></div><div style="width:70%"></div><div style="width:78%"></div></div></div>
+  </div>
+</div>
+
+<section id="features"><h2>Features</h2><p class="sub">Built with WinUI 3, .NET 10 and the Windows App SDK.</p>
+<div class="grid">
+<div class="f"><h3>Mica window</h3><p>Native WinUI 3 window with the Mica system backdrop.</p></div>
+<div class="f"><h3>Title-bar search</h3><p>A custom title bar with a built-in search box.</p></div>
+<div class="f"><h3>Simple navigation</h3><p>A NavigationView shell with Home and Settings pages.</p></div>
+<div class="f"><h3>Your settings</h3><p>Pick the app theme and where the navigation sits.</p></div>
+</div></section>
+
+<section id="download"><h2>Download</h2><p class="sub">Get the newest stable release.</p>
+<div class="dl"><div><h3 id="dv">Looking up the latest release…</h3><p id="dm"></p></div><a class="btn p" id="dbtn" href="#versions">See all versions</a></div></section>
+
+<section><h2>How to install</h2><p class="sub">Four quick steps.</p>
+<ol class="steps">
+<li>Download the installer file from the latest release above.</li>
+<li>Open the file and follow the prompts.</li>
+<li>If Windows SmartScreen appears, choose “More info”, then “Run anyway”.</li>
+<li>Start the app from the Start menu.</li>
+</ol></section>
+
+<section id="versions"><h2>All versions</h2><p class="sub">Every release, pulled live from GitHub.</p>
+<div class="tools"><input id="q" type="search" placeholder="Search versions or notes" aria-label="Search versions"><select id="ch" aria-label="Channel"><option value="all">All releases</option><option value="s">Stable only</option><option value="p">Pre-releases only</option></select></div>
+<div id="list"><div class="empty">Loading releases…</div></div></section>
+
+<section><h2>System requirements</h2><p class="sub">&nbsp;</p>
+<dl class="sp"><div><dt>OS</dt><dd>Windows 10 build 17763+</dd></div><div><dt>Architecture</dt><dd>64-bit (x64)</dd></div><div><dt>Runtime</dt><dd>.NET 10, Windows App SDK</dd></div><div><dt>Package</dt><dd>MSIX</dd></div></dl></section>
+
+<section id="faq" class="faq"><h2>FAQ</h2><p class="sub">&nbsp;</p>
+<details><summary>Windows SmartScreen warns me. Is that normal?</summary><p>New or unsigned apps can trigger it. Check the SHA-256 under the download, then choose “More info” and “Run anyway”.</p></details>
+<details><summary>How do I check my download?</summary><p>Run <code>Get-FileHash .\file-name</code> in PowerShell and compare it with the hash on the release.</p></details>
+<details><summary>How do I build it myself?</summary><p>Clone the repo, run <code>dotnet restore</code> then <code>dotnet build .\WinUI-App.slnx</code>, or press F5 in Visual Studio 2022.</p></details>
+</section>
+</main>
+<footer><span class="app">WinUI App</span> · <a class="repo" href="#">Source on GitHub</a> · <a id="iss" href="#">Report an issue</a></footer>
+</div>
+
+<script>
+/* Repo is detected automatically: ?repo=owner/name, then owner.github.io/repo, then the fallback. */
+const FALLBACK=["JeetRanpariyascspl","WinUI-App"], TYPES=[".exe",".msix",".msixbundle",".msi",".zip",".appinstaller"];
+const [OWNER,REPO]=(()=>{const p=new URLSearchParams(location.search).get("repo");if(p&&p.includes("/"))return p.split("/");
+const m=location.hostname.match(/^([^.]+)\.github\.io$/i);if(m){const r=location.pathname.split("/").filter(Boolean)[0];return[m[1],r&&!/\.html?$/i.test(r)?r:m[1]+".github.io"]}return FALLBACK})();
+const API=`https://api.github.com/repos/${OWNER}/${REPO}`, REPO_URL=`https://github.com/${OWNER}/${REPO}`;
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const size=b=>b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
+const day=d=>new Date(d).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
+const ver=r=>/^v?\d/.test(r.tag_name)?r.tag_name:(r.name||r.tag_name);
+let rels=[];
+
+const name=REPO.replace(/[-_]+/g," ");
+$$(".app").forEach(e=>e.textContent=name);document.title=`${name} – Download`;
+$$(".repo").forEach(a=>a.href=REPO_URL);$("#iss").href=REPO_URL+"/issues";
+$("#th").onclick=()=>{const d=matchMedia("(prefers-color-scheme: dark)").matches;const c=document.documentElement.dataset.t||(d?"dark":"light");const n=c==="dark"?"light":"dark";document.documentElement.dataset.t=n;try{localStorage.setItem("t",n)}catch(e){}};
+try{const t=localStorage.getItem("t");if(t)document.documentElement.dataset.t=t}catch(e){}
+
+/* small, safe Markdown renderer for release notes */
+function md(src){
+  const inl=t=>esc(t).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" rel="noopener">$1</a>');
+  let out="",ul=false,pre=false;
+  for(const l of String(src||"").replace(/\r/g,"").split("\n")){
+    if(l.startsWith("```")){out+=pre?"</pre>":(ul?(ul=false,"</ul>"):"")+"<pre>";pre=!pre;continue}
+    if(pre){out+=esc(l)+"\n";continue}
+    const li=l.match(/^\s*[-*]\s+(.*)/),h=l.match(/^(#{1,4})\s+(.*)/),ol=l.match(/^\s*\d+\.\s+(.*)/);
+    if(li||ol){if(!ul){out+="<ul>";ul=true}out+=`<li>${inl((li||ol)[1])}</li>`;continue}
+    if(ul){out+="</ul>";ul=false}
+    if(h)out+=`<h4>${inl(h[2])}</h4>`;else if(l.trim())out+=`<p>${inl(l)}</p>`;
+  }
+  return out+(ul?"</ul>":"")+(pre?"</pre>":"");
+}
+const wanted=a=>TYPES.some(t=>a.name.toLowerCase().endsWith(t));
+
+function top(){
+  const L=rels.find(r=>!r.prerelease)||rels[0];
+  if(!L){ $("#pill").textContent="No release published yet";$("#dv").textContent="No release yet";
+    $("#dm").innerHTML=`Publish one on GitHub and attach your installer. <a href="${REPO_URL}/releases/new">Create a release</a>`;
+    $("#dbtn").textContent="View on GitHub";$("#dbtn").href=REPO_URL;$("#main").textContent="View on GitHub";$("#main").href=REPO_URL;return}
+  const f=L.assets.find(a=>/\.(exe|msix|msixbundle|msi)$/i.test(a.name))||L.assets.find(wanted);
+  const href=f?f.browser_download_url:L.html_url;
+  $("#pill").textContent=`Latest: ${ver(L)} · ${day(L.published_at)}`;
+  $("#dv").textContent=`${name} ${ver(L)}`;
+  $("#dm").textContent=f?`${f.name} · ${size(f.size)} · released ${day(L.published_at)}`:`Released ${day(L.published_at)}. Open the release page to get the files.`;
+  $("#dbtn").textContent=f?"Download now":"Open release";$("#dbtn").href=href;
+  $("#main").textContent=`Download ${ver(L)}`;$("#main").href=href;
+}
+function list(){
+  const q=$("#q").value.trim().toLowerCase(),c=$("#ch").value,L=rels.find(r=>!r.prerelease)||rels[0];
+  if(!rels.length){$("#list").innerHTML=`<div class="empty">No releases yet. <a href="${REPO_URL}/releases/new">Create the first one</a> and it will show up here.</div>`;return}
+  const rows=rels.filter(r=>(c==="all"||(c==="p")===!!r.prerelease)&&(!q||(r.tag_name+" "+(r.name||"")+" "+(r.body||"")).toLowerCase().includes(q)));
+  $("#list").innerHTML=rows.length?rows.map(r=>{const as=r.assets.filter(wanted);return `<details class="rel"${r===L?" open":""}>
+  <summary><span class="v">${esc(ver(r))}</span>${r===L?'<span class="tg l">Latest</span>':""}${r.prerelease?'<span class="tg pr">Pre-release</span>':""}<span class="dt">${day(r.published_at)}</span></summary>
+  <div class="rb"><div class="md">${r.body?md(r.body):"<p>No release notes.</p>"}</div>
+  <div class="as">${as.length?as.map(a=>`<div class="a"><span class="n">${esc(a.name)}</span><span class="m">${size(a.size)} · ${a.download_count||0} downloads</span><a class="btn p" href="${esc(a.browser_download_url)}">Download</a>${a.digest?`<span class="h">SHA-256: ${esc(a.digest.replace("sha256:",""))}</span>`:""}</div>`).join(""):`<div class="m">No installer attached. <a href="${esc(r.html_url)}">View on GitHub</a></div>`}</div></div></details>`}).join(""):`<div class="empty">No releases match your search.</div>`;
+}
+async function load(){
+  try{const r=await fetch(`${API}/releases?per_page=100`,{headers:{Accept:"application/vnd.github+json"}});
+    if(!r.ok)throw new Error(r.status);rels=(await r.json()).filter(x=>!x.draft);top();list();
+  }catch(e){
+    $("#pill").textContent="Releases on GitHub";$("#dv").textContent="Open the releases page";
+    $("#dm").textContent="Live data could not load (GitHub may be limiting requests). Try again in a few minutes.";
+    $("#dbtn").textContent="Go to releases";$("#dbtn").href=REPO_URL+"/releases";$("#main").textContent="Go to releases";$("#main").href=REPO_URL+"/releases";
+    $("#list").innerHTML=`<div class="empty">Couldn’t load the list. <a href="${REPO_URL}/releases">See releases on GitHub</a></div>`;
+  }
+}
+$("#q").oninput=list;$("#ch").onchange=list;
+fetch(API).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.description)$("#tag").textContent=d.description}).catch(()=>{});
+load();
+</script>
+</body>
+</html>
