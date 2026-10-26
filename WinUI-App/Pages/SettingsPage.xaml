@@ -23,7 +23,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBlock x:Name="PageHeader" Text="Settings" MaxWidth="1064" Margin="36, 24, 36, 0" Style="{StaticResource TitleTextBlockStyle}"/>
-        <ScrollView Grid.Row="1">
+        <ScrollView Grid.Row="1" Padding="36, 0, 36, 0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
             <Border>
                 <StackPanel>
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="Appearance &amp; behavior"/>

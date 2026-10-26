@@ -9,7 +9,7 @@
   IgnorableNamespaces="uap rescap systemai">
 
   <Identity
-    Name="33e7ed00-847b-4866-a0c6-a5b99929000f"
+    Name="Jeet.WinUIApp"
     Publisher="CN=WinUI-App"
     Version="1.0.1.0" />
 
