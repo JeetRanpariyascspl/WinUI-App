@@ -12,12 +12,13 @@
 ; ============================================================================
 
 #define AppName "WinUI-App"
-#define AppVersion "1.0.0"
+#define AppVersion "1.0.1"
 #define PublisherName "Jeet"
-#define PackageDir "..\AppPackages\WinUI-App_1.0.0.0_x64_Test"
+#define FileName "WinUI-App_1.0.1.0_x64"
+#define PackageDir "..\AppPackages\" + FileName + "_Test"
 #define PackageIdentityName "33e7ed00-847b-4866-a0c6-a5b99929000f"
-#define PackageFile "WinUI-App_1.0.0.0_x64.msix"
-#define CertificateFile "WinUI-App_1.0.0.0_x64.cer"
+#define PackageFile FileName + ".msix"
+#define CertificateFile FileName + ".cer"
 #define AppIdValue "33e7ed00-847b-4866-a0c6-a5b99929000f"
 
 [Setup]

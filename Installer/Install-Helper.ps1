@@ -190,7 +190,19 @@ function Invoke-Deploy {
     if ($deps.Count -gt 0) { $params['DependencyPath'] = $deps }
 
     Write-Log "Installing package: $PackageFile"
-    Add-AppxPackage @params
+    try {
+        Add-AppxPackage @params
+    }
+    catch {
+        if ($_.Exception.Message -match '0x80073CFB') {
+            Write-Log 'A development registration is blocking this package update. Removing it and retrying.' 'WARN'
+            Remove-InstalledPackage
+            Add-AppxPackage @params
+        }
+        else {
+            throw
+        }
+    }
     Write-Log 'Package installed successfully.'
 
     if ($InfoFile) {
