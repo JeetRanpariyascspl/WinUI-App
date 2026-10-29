@@ -69,8 +69,8 @@
 
 		<!-- Remove localized resource folders, PDBs, extra image scales -->
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-		<DebugType>none</DebugType>
-		<DebugSymbols>false</DebugSymbols>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
 		<AppxDefaultResourceQualifiers>Language=en-US|Scale=200</AppxDefaultResourceQualifiers>
 
 		<!-- Removes ICU data. Delete this line if you need culture-specific formatting/sorting -->
@@ -84,6 +84,10 @@
 		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
 		<PublishTrimmed Condition="'$(Configuration)' != 'Debug' and '$(SelfContained)' != 'false'">True</PublishTrimmed>
 		<PublishTrimmed Condition="'$(SelfContained)' == 'false'">False</PublishTrimmed>
+		<!-- <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed> -->
 		<TrimMode>partial</TrimMode>
 		<PackageCertificateThumbprint>24944620283978CE0BB1BAF70E28EBC3B0B19076</PackageCertificateThumbprint>
 		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>

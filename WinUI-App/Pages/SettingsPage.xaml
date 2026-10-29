@@ -46,12 +46,18 @@
                             <ComboBoxItem Content="Top" />
                         </ComboBox>
                     </toolkit:SettingsCard>
+                    <toolkit:SettingsCard Header="Update">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE895;"/>
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <Button x:Name="CheckUpdatesButton" Content="Check for updates" Click="CheckUpdatesButton_Click"/>
+                    </toolkit:SettingsCard>
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="About"/>
                     <toolkit:SettingsExpander Margin="0, 0, 0, 36" Description="© 2026 Jeet. All rights reserved." Header="{StaticResource AppTitleName}">
                         <toolkit:SettingsExpander.HeaderIcon>
                             <BitmapIcon ShowAsMonochrome="False" UriSource="/Assets/Tiles/BadgeLogo.png" />
                         </toolkit:SettingsExpander.HeaderIcon>
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Text="{x:Bind Version}"/>
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Text="{x:Bind AppVersion}"/>
                         <toolkit:SettingsExpander.Items>
                             <toolkit:SettingsCard x:Name="CloneRepoCard" Click="CloneRepoCard_Click" Header="To clone this repository" IsClickEnabled="True">
                                 <TextBlock x:Name="GitCloneTextBlock" FontFamily="Consolas" Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Text="git clone https://github.com/JeetRanpariyascspl/WinUI-App"/>

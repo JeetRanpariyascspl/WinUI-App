@@ -23,7 +23,7 @@
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid MaxWidth="1200" Margin="36,28,36,48">
+        <Grid MaxWidth="1200" Padding="36,0,36,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="24" />

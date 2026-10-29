@@ -8,6 +8,13 @@ namespace WinUI_App.Helpers
     internal class ProcessInfoHelper
     {
         private static readonly FileVersionInfo? _fileVersionInfo;
+        private static readonly Process _process;
+
+        static ProcessInfoHelper()
+        {
+            _process = Process.GetCurrentProcess();
+            _fileVersionInfo = _process.MainModule?.FileVersionInfo;
+        }
 
         public static Version? GetVersion()
         {
