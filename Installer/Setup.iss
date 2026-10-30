@@ -12,9 +12,9 @@
 ; ============================================================================
 
 #define AppName "WinUI-App"
-#define AppVersion "1.0.1"
+#define AppVersion "1.0.2.0"
 #define PublisherName "Jeet"
-#define FileName "WinUI-App_1.0.1.0_x64"
+#define FileName "WinUI-App_1.0.2.0_x64"
 #define PackageDir "..\AppPackages\" + FileName + "_Test"
 #define PackageIdentityName "33e7ed00-847b-4866-a0c6-a5b99929000f"
 #define PackageFile FileName + ".msix"

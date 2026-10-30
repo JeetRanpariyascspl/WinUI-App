@@ -11,7 +11,7 @@
   <Identity
     Name="33e7ed00-847b-4866-a0c6-a5b99929000f"
     Publisher="CN=WinUI-App"
-    Version="1.0.1.0" />
+    Version="1.0.2.0" />
 
   <mp:PhoneIdentity PhoneProductId="33e7ed00-847b-4866-a0c6-a5b99929000f" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
