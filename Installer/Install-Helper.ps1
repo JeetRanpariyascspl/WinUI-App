@@ -6,6 +6,11 @@
     Exit codes:   0 = success
                   1 = failure (details are in the log file)
                   3 = a newer version of the package is already installed
+                  4 = dependency / framework packages missing or conflicting
+                  5 = the signing certificate is not trusted
+                  6 = installing apps outside the Store (sideloading) is disabled
+                  7 = same identity but a different signature is already installed
+                  8 = the .msix identity differs from the one Setup was built for
                  20 = (Detect only) the package is not installed
 #>
 [CmdletBinding()]
@@ -25,6 +30,7 @@ param(
     [string]$InfoFile,
     [string]$UninstallExe,
     [string]$UninstallRegKey,
+    [string]$ExpectedVersion,
     [string]$ShortcutName = 'WinUI-App',
     [switch]$DesktopShortcut,
     [switch]$StartMenuShortcut
@@ -50,8 +56,77 @@ function Write-Log {
 }
 
 # ---------------------------------------------------------------------------
+# Diagnostics (so a failure on any PC can be understood from installation.log)
+# ---------------------------------------------------------------------------
+function Write-Diagnostics {
+    try {
+        $os = Get-CimInstance -ClassName Win32_OperatingSystem
+        Write-Log ('OS: {0} (build {1}), PowerShell {2}' -f $os.Caption, $os.BuildNumber, $PSVersionTable.PSVersion)
+    }
+    catch { }
+
+    foreach ($key in @('HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx',
+                       'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock')) {
+        try {
+            if (Test-Path -LiteralPath $key) {
+                $props = (Get-ItemProperty -LiteralPath $key).PSObject.Properties | Where-Object { $_.Name -notlike 'PS*' }
+                foreach ($prop in $props) { Write-Log ('{0}  {1} = {2}' -f $key, $prop.Name, $prop.Value) }
+            }
+        }
+        catch { }
+    }
+}
+
+function Write-ErrorDetails {
+    param([string]$Message)
+    # Windows puts an ActivityId in deployment errors; Get-AppPackageLog turns it into the real reason.
+    if ($Message -match '(?i)ActivityId\]?\s+([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})') {
+        $activity = $Matches[1]
+        try {
+            $details = Get-AppPackageLog -ActivityID $activity -ErrorAction Stop | Out-String
+            Write-Log ("Deployment log for activity {0}:`r`n{1}" -f $activity, $details) 'ERROR'
+        }
+        catch {
+            Write-Log "Could not read the deployment log for activity $activity." 'WARN'
+        }
+    }
+}
+
+function Get-ExitCodeForError {
+    param([string]$Message)
+    switch -Regex ($Message) {
+        '0x80073D06'                  { return 3 }
+        '0x80073CF3'                  { return 4 }
+        'Could not download|installer failed with exit code|installer completed, but' { return 4 }
+        '0x800B0109|0x800B010A'       { return 5 }
+        '0x80073CFF'                  { return 6 }
+        '0x80073CFB'                  { return 7 }
+        'does not match the identity' { return 8 }
+        default                       { return 1 }
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Package helpers
 # ---------------------------------------------------------------------------
+function Get-PackageManifestInfo {
+    param([string]$Path)
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
+    try {
+        $entry = $zip.Entries | Where-Object { $_.FullName -eq 'AppxManifest.xml' } | Select-Object -First 1
+        if (-not $entry) { return $null }
+        $reader = New-Object System.IO.StreamReader($entry.Open())
+        try { $text = $reader.ReadToEnd() } finally { $reader.Dispose() }
+        $identity = ([xml]$text).Package.Identity
+        return [pscustomobject]@{
+            Name      = [string]$identity.Name
+            Version   = [string]$identity.Version
+            Publisher = [string]$identity.Publisher
+        }
+    }
+    finally { $zip.Dispose() }
+}
 function Get-InstalledPackages {
     @(Get-AppxPackage -Name $PackageName)
 }
@@ -107,7 +182,12 @@ function Invoke-DownloadAndInstall {
     $installerPath = Join-Path $env:TEMP ('WinUI-App-' + [guid]::NewGuid().ToString('N') + '.exe')
     try {
         Write-Log "Downloading $Description from $Uri"
-        Invoke-WebRequest -Uri $Uri -OutFile $installerPath -UseBasicParsing
+        try {
+            Invoke-WebRequest -Uri $Uri -OutFile $installerPath -UseBasicParsing
+        }
+        catch {
+            throw "Could not download the $Description. Check the internet connection and run Setup again. ($($_.Exception.Message))"
+        }
         if (-not (Test-Path -LiteralPath $installerPath) -or (Get-Item -LiteralPath $installerPath).Length -eq 0) {
             throw "The $Description download was empty."
         }
@@ -167,6 +247,21 @@ function Invoke-Deploy {
         throw "Package file not found: $PackageFile"
     }
 
+    $info = $null
+    try { $info = Get-PackageManifestInfo -Path $PackageFile }
+    catch { Write-Log "Could not read the package manifest: $($_.Exception.Message)" 'WARN' }
+
+    if ($info) {
+        Write-Log ('Package identity: {0}   version {1}   publisher {2}' -f $info.Name, $info.Version, $info.Publisher)
+        if ($info.Name -ne $PackageName) {
+            throw "The package identity '$($info.Name)' does not match the identity Setup was built for ('$PackageName'). Rebuild Setup with the matching PackageIdentityName."
+        }
+        if ($ExpectedVersion -and ($info.Version -ne $ExpectedVersion)) {
+            Write-Log "Setup is labelled $ExpectedVersion but the package inside it is version $($info.Version)." 'WARN'
+        }
+    }
+
+    # The installer no longer carries the runtimes (that was +47 MB). Download them only when missing.
     Ensure-DeploymentRuntimes
 
     if ($CertificateFile -and (Test-Path -LiteralPath $CertificateFile)) {
@@ -190,20 +285,16 @@ function Invoke-Deploy {
     if ($deps.Count -gt 0) { $params['DependencyPath'] = $deps }
 
     Write-Log "Installing package: $PackageFile"
-    try {
-        Add-AppxPackage @params
+    Add-AppxPackage @params
+    Write-Log 'Add-AppxPackage finished.'
+
+    # Do not trust "no error": make sure Windows really has the version we just deployed.
+    $installed = Get-InstalledPackages | Select-Object -First 1
+    if (-not $installed) { throw 'Windows reported success, but the package is not installed.' }
+    Write-Log "Installed package version is now $($installed.Version)."
+    if ($info -and ([version][string]$installed.Version -ne [version]$info.Version)) {
+        throw "Windows still has version $($installed.Version) instead of $($info.Version)."
     }
-    catch {
-        if ($_.Exception.Message -match '0x80073CFB') {
-            Write-Log 'A development registration is blocking this package update. Removing it and retrying.' 'WARN'
-            Remove-InstalledPackage
-            Add-AppxPackage @params
-        }
-        else {
-            throw
-        }
-    }
-    Write-Log 'Package installed successfully.'
 
     if ($InfoFile) {
         # The installer reads this to implement the "Open App" button.
@@ -299,6 +390,7 @@ $exitCode = 0
 try {
     if ($Action -ne 'Detect') {
         Write-Log ('===== {0} started =====' -f $Action)
+        if (@('Install', 'Update', 'Reinstall') -contains $Action) { Write-Diagnostics }
     }
 
     switch ($Action) {
@@ -326,14 +418,9 @@ try {
 catch {
     $message = $_.Exception.Message
     Write-Log $message 'ERROR'
-
-    if ($message -match '0x80073D06') {
-        Write-Log 'A newer version of this package is already installed. Use Reinstall to replace it.' 'ERROR'
-        $exitCode = 3
-    }
-    else {
-        $exitCode = 1
-    }
+    Write-ErrorDetails -Message $message
+    $exitCode = Get-ExitCodeForError -Message $message
+    Write-Log "Exit code: $exitCode" 'ERROR'
 }
 
 exit $exitCode

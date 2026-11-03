@@ -12,9 +12,9 @@
 ; ============================================================================
 
 #define AppName "WinUI-App"
-#define AppVersion "1.0.2.0"
+#define AppVersion "1.0.2.1"
 #define PublisherName "Jeet"
-#define FileName "WinUI-App_1.0.2.0_x64"
+#define FileName "WinUI-App_" + AppVersion + "_x64"
 #define PackageDir "..\AppPackages\" + FileName + "_Test"
 #define PackageIdentityName "33e7ed00-847b-4866-a0c6-a5b99929000f"
 #define PackageFile FileName + ".msix"
@@ -38,7 +38,7 @@ SetupIconFile=..\WinUI-App\Image\WinUI-App.ico
 UninstallDisplayIcon={app}\WinUI-App.ico
 UninstallDisplayName={#AppName}
 WizardStyle=modern
-Compression=lzma2
+Compression=lzma2/ultra64
 SolidCompression=yes
 PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64
@@ -58,6 +58,20 @@ Source: "Install-Helper.ps1"; Flags: dontcopy
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Shortcuts:"; Flags: unchecked
 Name: "startmenuicon"; Description: "Create a &Start Menu shortcut"; GroupDescription: "Shortcuts:"
+
+[InstallDelete]
+; The staged package file names contain the version (WinUI-App_1.0.1.0_x64.msix), so an update
+; never overwrites the previous version's files - they just pile up. Remove them before the new
+; ones are copied. (Windows keeps only ONE installed version of the app regardless.)
+Type: files; Name: "{app}\*.msix"
+Type: files; Name: "{app}\*.cer"
+Type: filesandordirs; Name: "{app}\Dependencies"
+
+[Registry]
+; Windows already lists the MSIX package itself under Settings > Apps > Installed apps. Inno Setup adds a
+; second record of its own, so the app showed up twice. SystemComponent=1 hides Inno's record from that
+; list (it stays in the registry, so Setup can still find the uninstaller and the previous folder).
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{{#AppIdValue}}_is1"; ValueType: dword; ValueName: "SystemComponent"; ValueData: 1
 
 [UninstallRun]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; \
@@ -81,7 +95,13 @@ const
   StepDone    = 2;
   StepFailed  = 3;
 
-  ExitNewerVersion = 3;   { Install-Helper.ps1: newer version already installed }
+  { exit codes returned by Install-Helper.ps1 }
+  ExitNewerVersion = 3;   { a newer version is already installed }
+  ExitDependency   = 4;   { framework or dependency packages missing or conflicting }
+  ExitCertificate  = 5;   { signing certificate is not trusted }
+  ExitSideloading  = 6;   { installing apps from outside the Store is disabled }
+  ExitConflict     = 7;   { same identity but a different signature is already installed }
+  ExitIdentity     = 8;   { package identity differs from the one Setup was built for }
 
 var
   { detection / chosen action }
@@ -229,16 +249,9 @@ begin
       InstalledVersion := Trim(String(Raw));
   end;
 
-  { a leftover entry from a previous run of this installer also counts }
-  if RegKeyExists(HKLM64, UninstallKeyPath) or RegKeyExists(HKLM, UninstallKeyPath) then
-  begin
-    AppAlreadyInstalled := True;
-    if InstalledVersion = '' then
-    begin
-      if not RegQueryStringValue(HKLM64, UninstallKeyPath, 'DisplayVersion', InstalledVersion) then
-        RegQueryStringValue(HKLM, UninstallKeyPath, 'DisplayVersion', InstalledVersion);
-    end;
-  end;
+  { Only the MSIX package counts as installed. The installer own registry entry is hidden from
+    Settings (see the Registry section), so a leftover entry after the app was removed in Settings
+    must not make Setup think the app is still there. }
 end;
 
 { ---------------------------------------------------------------------------
@@ -340,6 +353,7 @@ begin
     ' -IconFile ' + AddQuotes(AppDirNow + '\WinUI-App.ico') +
     ' -LogFile ' + AddQuotes(InstallLogPath) +
     ' -InfoFile ' + AddQuotes(AumidFile) +
+    ' -ExpectedVersion ' + AddQuotes('{#AppVersion}') +
     ' -ShortcutName ' + AddQuotes('{#AppName}');
 
   { step 1 is finished: the installer files have been copied }
@@ -565,6 +579,24 @@ begin
   OpenLogFile(InstallLogPath);
 end;
 
+function FailureDetail(Code: Integer): String;
+begin
+  if Code = ExitNewerVersion then
+    Result := 'A newer version of {#AppName} is already installed. Run Setup again and choose Reinstall to replace it.'
+  else if Code = ExitDependency then
+    Result := 'Windows could not install the framework packages that {#AppName} needs (for example the Windows App Runtime). Setup downloads them automatically, so check the internet connection and run Setup again. Details are in the log.'
+  else if Code = ExitCertificate then
+    Result := 'Windows does not trust the certificate this package was signed with. Run Setup as administrator and try again. Details are in the log.'
+  else if Code = ExitSideloading then
+    Result := 'This PC does not allow installing apps from outside the Microsoft Store. Ask your administrator to turn on sideloading.'
+  else if Code = ExitConflict then
+    Result := 'A copy of {#AppName} with a different signature is already installed. Run Setup again and choose Reinstall.'
+  else if Code = ExitIdentity then
+    Result := 'The package inside this Setup is not the one Setup was built for (package identity mismatch). Rebuild Setup with the correct PackageIdentityName.'
+  else
+    Result := '{#AppName} could not be installed. Click Show Log to see what went wrong.';
+end;
+
 procedure ConfigureFinishedPage;
 var
   Heading, Detail: String;
@@ -588,11 +620,7 @@ begin
   else
   begin
     Heading := 'Installation failed';
-    if InstallExitCode = ExitNewerVersion then
-      Detail := 'A newer version of {#AppName} is already installed. ' +
-        'Run Setup again and choose Reinstall to replace it.'
-    else
-      Detail := '{#AppName} could not be installed. Click Show Log to see what went wrong.';
+    Detail := FailureDetail(InstallExitCode);
     WizardForm.FinishedHeadingLabel.Font.Color := clRed;
   end;
 

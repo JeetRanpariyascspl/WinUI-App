@@ -12,12 +12,13 @@
 ; ============================================================================
 
 #define AppName "WinUI-App"
-#define AppVersion "1.0.0"
+#define AppVersion "1.0.2.0"
 #define PublisherName "Jeet"
-#define PackageDir "..\AppPackages\WinUI-App_1.0.0.0_x64_Debug_Test"
+#define FileName "WinUI-App_1.0.2.0_x64"
+#define PackageDir "..\AppPackages\" + FileName + "_Test"
 #define PackageIdentityName "33e7ed00-847b-4866-a0c6-a5b99929000f"
-#define PackageFile "WinUI-App_1.0.0.0_x64_Debug.msix"
-#define CertificateFile "WinUI-App_1.0.0.0_x64_Debug.cer"
+#define PackageFile FileName + ".msix"
+#define CertificateFile FileName + ".cer"
 #define AppIdValue "33e7ed00-847b-4866-a0c6-a5b99929000f"
 
 [Setup]
@@ -49,7 +50,8 @@ VersionInfoVersion={#AppVersion}
 SelectDirLabel3=Setup will place the installer files, uninstaller and installation log of [name] in the following folder. The app itself is deployed by Windows as an MSIX package.
 
 [Files]
-Source: "{#PackageDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PackageDir}\{#PackageFile}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#PackageDir}\{#CertificateFile}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\WinUI-App\Image\WinUI-App.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Install-Helper.ps1"; Flags: dontcopy
 
