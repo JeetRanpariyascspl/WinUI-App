@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.WindowsAppSDK.Runtime;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -99,7 +100,7 @@ public sealed partial class SettingsPage : Page
     {
         get
         {
-            return ProcessInfoHelper.GetVersion() is Version version
+            return ProcessInfoHelper.GetVersion() is System.Version version
                 ? string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision)
                 : string.Empty;
         }
@@ -120,15 +121,14 @@ public sealed partial class SettingsPage : Page
         try
         {
             var release = await UpdateService.GetLatestAsync();
-            if (release == null || !Version.TryParse(AppVersion, out var currentFull))
+            if (release == null || !System.Version.TryParse(AppVersion, out var currentFull))
             {
                 await DialogHelper.ShowDialog(this.XamlRoot, "Error", "Couldn't read version numbers.");
                 return;
             }
 
-            // Compare as major.minor.build so "1.0.1" vs "1.0.1.0" doesn't confuse things
-            var current = new Version(currentFull.Major, currentFull.Minor, Math.Max(currentFull.Build, 0));
-            var latest = new Version(release.Version.Major, release.Version.Minor, Math.Max(release.Version.Build, 0));
+            var current = new System.Version(currentFull.Major, currentFull.Minor, currentFull.Build, currentFull.Revision);
+            var latest = new System.Version(release.Version.Major, release.Version.Minor, release.Version.Build, release.Version.Revision);
 
             if (latest <= current)
             {
