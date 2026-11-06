@@ -17,89 +17,91 @@ namespace WinUI_App.Helpers
         private const string Repo = "WinUI-App";
         private static readonly string[] Extensions = { ".msix", ".msixbundle", ".msi", ".exe" };
 
-        private static readonly HttpClient _http = CreateClient();
+        private static readonly HttpClient httpClient = CreateClient();
 
         private static HttpClient CreateClient()
         {
-            var c = new HttpClient();
-            c.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("WinUI-App", "1.0"));
-            c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            return c;
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("WinUI-App", "1.0"));
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+            return httpClient;
         }
 
         public static async Task<ReleaseInfo?> GetLatestAsync()
         {
-            var url = $"https://api.github.com/repos/{Owner}/{Repo}/releases/latest";
-            var json = await _http.GetStringAsync(url);
+            string Url = $"https://api.github.com/repos/{Owner}/{Repo}/releases/latest";
+            string Json = await httpClient.GetStringAsync(Url);
 
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
+            JsonDocument jsonDocument = JsonDocument.Parse(Json);
+            JsonElement jsonElement = jsonDocument.RootElement;
 
-            var tag = root.GetProperty("tag_name").GetString() ?? "";
+            string tag = jsonElement.GetProperty("tag_name").GetString() ?? "";
             if (!Version.TryParse(tag.TrimStart('v', 'V'), out var version))
+            {
                 return null;
+            }
 
-            var info = new ReleaseInfo
+            ReleaseInfo releaseInfo = new ReleaseInfo
             {
                 Version = version,
-                PageUrl = root.GetProperty("html_url").GetString() ?? "",
-                AppName = Repo   // "WinUI-App"; change to a friendly name if you like
+                PageUrl = jsonElement.GetProperty("html_url").GetString() ?? "",
+                AppName = Repo
             };
 
-            foreach (var asset in root.GetProperty("assets").EnumerateArray())
+            foreach (JsonElement asset in jsonElement.GetProperty("assets").EnumerateArray())
             {
                 var name = asset.GetProperty("name").GetString() ?? "";
                 if (Extensions.Any(e => name.EndsWith(e, StringComparison.OrdinalIgnoreCase)))
                 {
-                    info.AssetName = name;
-                    info.AssetUrl = asset.GetProperty("browser_download_url").GetString() ?? "";
+                    releaseInfo.AssetName = name;
+                    releaseInfo.AssetUrl = asset.GetProperty("browser_download_url").GetString() ?? "";
                     break;
                 }
             }
-            return info;
+            return releaseInfo;
         }
 
-        public static async Task<string> DownloadAsync(ReleaseInfo release, IProgress<double> progress)
+        public static async Task<string> DownloadAsync(ReleaseInfo Release, IProgress<double> Progress)
         {
-            var path = Path.Combine(Path.GetTempPath(), release.AssetName);
+            string AppPath = Path.Combine(Path.GetTempPath(), Release.AssetName);
 
-            using var response = await _http.GetAsync(release.AssetUrl, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
-            var total = response.Content.Headers.ContentLength ?? -1L;
+            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(Release.AssetUrl, HttpCompletionOption.ResponseHeadersRead);
+            httpResponseMessage.EnsureSuccessStatusCode();
+            long total = httpResponseMessage.Content.Headers.ContentLength ?? -1L;
 
-            using var source = await response.Content.ReadAsStreamAsync();
-            using var target = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+            Stream Source = await httpResponseMessage.Content.ReadAsStreamAsync();
+            FileStream fileStream = new FileStream(AppPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
-            var buffer = new byte[81920];
+            byte[] buffer = new byte[81920];
             long read = 0;
             int n;
-            while ((n = await source.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            while ((n = await Source.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
-                await target.WriteAsync(buffer, 0, n);
+                await fileStream.WriteAsync(buffer, 0, n);
                 read += n;
-                if (total > 0) progress.Report(read * 100.0 / total);
+                if (total > 0) Progress.Report(read * 100.0 / total);
             }
-            return path;
+            return AppPath;
         }
 
-        public static async Task InstallAsync(string path)
+        public static async Task InstallAsync(string AppPath)
         {
-            var ext = Path.GetExtension(path).ToLowerInvariant();
+            string ext = Path.GetExtension(AppPath).ToLowerInvariant();
             if (ext == ".msix" || ext == ".msixbundle")
             {
-                var file = await StorageFile.GetFileFromPathAsync(path);
-                await Launcher.LaunchFileAsync(file);   // opens App Installer with an Update button
+                StorageFile storageFile = await StorageFile.GetFileFromPathAsync(AppPath);
+                await Launcher.LaunchFileAsync(storageFile);   // opens App Installer with an Update button
             }
             else
             {
-                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo(AppPath) { UseShellExecute = true });
             }
         }
     }
 
     public class ReleaseInfo
     {
-        public Version Version { get; set; } = new Version(0, 0, 0);
+        public Version Version { get; set; } = new Version(0, 0, 0, 0);
         public string PageUrl { get; set; } = "";
         public string AssetName { get; set; } = "";
         public string AssetUrl { get; set; } = "";

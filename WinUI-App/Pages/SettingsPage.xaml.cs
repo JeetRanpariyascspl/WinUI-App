@@ -1,3 +1,4 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -68,23 +69,30 @@ public sealed partial class SettingsPage : Page
 
     private void ThemeMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (Application.Current is not App app)
+        if (sender is not UIElement senderUiLement || (ThemeMode.SelectedItem as ComboBoxItem)?.Tag.ToString() is not string selectedTheme || WindowHelper.GetWindowForElement(this) is not Window window)
         {
             return;
         }
 
-        var theme = ThemeMode.SelectedIndex switch
-        {
-            0 => ElementTheme.Light,
-            1 => ElementTheme.Dark,
-            2 => ElementTheme.Default,
-            _ => (ElementTheme?)null
-        };
+        ThemeHelper.RootTheme = EnumHelper.GetEnum<ElementTheme>(selectedTheme);
+        var elementThemeResolved = ThemeHelper.RootTheme == ElementTheme.Default ? ThemeHelper.ActualTheme : ThemeHelper.RootTheme;
+        TitleBarHelper.ApplySystemThemeToCaptionButtons(window, elementThemeResolved);
 
-        if (theme.HasValue)
-        {
-            app.SetTheme(theme.Value);
-        }
+        // announce visual change to automation
+        UIHelper.AnnounceActionForAccessibility(senderUiLement, $"Theme changed to {elementThemeResolved}", "ThemeChangedNotificationActivityId");
+
+        //var theme = ThemeMode.SelectedIndex switch
+        //{
+        //    0 => ElementTheme.Light,
+        //    1 => ElementTheme.Dark,
+        //    2 => ElementTheme.Default,
+        //    _ => (ElementTheme?)null
+        //};
+
+        //if (theme.HasValue)
+        //{
+        //    app.SetTheme(theme.Value);
+        //}
     }
 
     private void NavigationLocation_SelectionChanged(object sender, SelectionChangedEventArgs e)

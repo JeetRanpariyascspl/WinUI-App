@@ -49,6 +49,7 @@
             <Frame x:Name="rootFrame" />
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="Home" AutomationProperties.AutomationId="Home" Content="Home" Icon="Home" />
+                <NavigationViewItem x:Name="Database" AutomationProperties.AutomationId="Database" Content="Database" Icon="Library" />
             </NavigationView.MenuItems>
         </NavigationView>
     </Grid>

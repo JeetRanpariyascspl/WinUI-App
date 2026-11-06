@@ -1,3 +1,4 @@
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -24,6 +25,10 @@ namespace WinUI_App
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        private OverlappedPresenter? WindowPresenter { get; }
+
+        private OverlappedPresenterState CurrentWindowState { get; set; }
+
         public NavigationView NavigationView
         {
             get { return NavigationViewControl; }
@@ -33,8 +38,26 @@ namespace WinUI_App
         {
             InitializeComponent();
             SetWindowProperties();
-            NavigationViewControl.SelectedItem = Home;
             rootFrame.Navigate(typeof(HomePage));
+
+            if (AppWindow.Presenter is OverlappedPresenter windowPresenter)
+            {
+                WindowPresenter = windowPresenter;
+                CurrentWindowState = WindowPresenter.State;
+                AdjustNavigationViewMargin(force: true);
+                AppWindow.Changed += (_, _) => AdjustNavigationViewMargin();
+            }
+        }
+
+        private void AdjustNavigationViewMargin(bool? force = null)
+        {
+            if (WindowPresenter is null || (WindowPresenter.State == CurrentWindowState && force is not true))
+            {
+                return;
+            }
+
+            NavigationView.Margin = WindowPresenter.State == OverlappedPresenterState.Maximized ? new Thickness(0, -1, 0, 0) : new Thickness(0, -2, 0, 0);
+            CurrentWindowState = WindowPresenter.State;
         }
 
         public void NavigateToSettings()
@@ -52,7 +75,8 @@ namespace WinUI_App
             this.ExtendsContentIntoTitleBar = true;
             this.SetTitleBar(TitleBar);
             //this.AppWindow.SetIcon("/Image/WinUI-App.ico");
-            //this.AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+            this.AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+            NavigationViewControl.SelectedItem = Home;
         }
 
         private void NavigationViewControl_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -72,6 +96,13 @@ namespace WinUI_App
                     if (rootFrame.CurrentSourcePageType != typeof(HomePage))
                     {
                         rootFrame.Navigate(typeof(HomePage));
+                    }
+                }
+                else if (navigationViewItemBase == Database)
+                {
+                    if (rootFrame.CurrentSourcePageType != typeof(DatabasePage))
+                    {
+                        rootFrame.Navigate(typeof(DatabasePage));
                     }
                 }
             }
