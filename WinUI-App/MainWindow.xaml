@@ -49,7 +49,12 @@
             <Frame x:Name="rootFrame" />
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="Home" AutomationProperties.AutomationId="Home" Content="Home" Icon="Home" />
-                <NavigationViewItem x:Name="Database" AutomationProperties.AutomationId="Database" Content="Database" Icon="Library" />
+                <NavigationViewItem x:Name="Database" AutomationProperties.AutomationId="Database" Content="Databases" Icon="Library" />
+                <NavigationViewItem x:Name="SqlServerMonitor" AutomationProperties.AutomationId="SqlServerMonitor" Content="SQL Server Monitor">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Clock" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
         </NavigationView>
     </Grid>

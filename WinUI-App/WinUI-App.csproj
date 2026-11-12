@@ -39,10 +39,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
 		<!-- This app does not use Windows ML; omit its large ONNX and DirectML runtime assets. -->
 		<PackageReference Include="Microsoft.Windows.AI.MachineLearning" Version="2.4.89" ExcludeAssets="all" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.0.18" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -74,7 +76,7 @@
 		<AppxDefaultResourceQualifiers>Language=en-US|Scale=200</AppxDefaultResourceQualifiers>
 
 		<!-- Removes ICU data. Delete this line if you need culture-specific formatting/sorting -->
-		<InvariantGlobalization>true</InvariantGlobalization>
+		<InvariantGlobalization>false</InvariantGlobalization>
 	</PropertyGroup>
 
 	<!-- Publish Properties -->

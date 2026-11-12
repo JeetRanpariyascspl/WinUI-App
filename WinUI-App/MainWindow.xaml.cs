@@ -69,6 +69,12 @@ namespace WinUI_App
             }
         }
 
+        public void NavigateToSqlServerMonitor(SavedSqlConnection? connection = null)
+        {
+            NavigationViewControl.SelectedItem = SqlServerMonitor;
+            rootFrame.Navigate(typeof(SqlServerMonitorPage), connection);
+        }
+
         private void SetWindowProperties()
         {
             //this.Title = "My WinUI App";
@@ -96,6 +102,13 @@ namespace WinUI_App
                     if (rootFrame.CurrentSourcePageType != typeof(HomePage))
                     {
                         rootFrame.Navigate(typeof(HomePage));
+                    }
+                }
+                else if (navigationViewItemBase == SqlServerMonitor)
+                {
+                    if (rootFrame.CurrentSourcePageType != typeof(SqlServerMonitorPage))
+                    {
+                        NavigateToSqlServerMonitor();
                     }
                 }
                 else if (navigationViewItemBase == Database)

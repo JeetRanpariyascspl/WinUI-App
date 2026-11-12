@@ -1,0 +1,46 @@
+<Page x:Class="WinUI_App.Pages.DatabasePage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:WinUI_App.Pages">
+    <ScrollView Padding="36,24">
+        <Grid ColumnSpacing="24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="12">
+                <TextBlock Text="Saved SQL connections" Style="{StaticResource TitleTextBlockStyle}"/>
+                <ListView x:Name="List" ItemsSource="{x:Bind Items}" SelectionChanged="Changed">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:SavedSqlConnection">
+                            <StackPanel Padding="4">
+                                <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="{x:Bind Summary}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <Button x:Name="Analyze" Content="Open SQL analysis" Click="Open" IsEnabled="False"/>
+                <Button x:Name="Remove" Content="Remove" Click="Delete" IsEnabled="False"/>
+            </StackPanel>
+            <Border Grid.Column="1" Padding="24" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Connection" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <TextBox x:Name="Name" Header="Connection name"/>
+                    <TextBox x:Name="Server" Header="Server IP / host" PlaceholderText="192.168.1.10,1433"/>
+                    <TextBox x:Name="Database" Header="Database"/>
+                    <ComboBox x:Name="Auth" Header="Authentication" SelectionChanged="AuthChanged">
+                        <ComboBoxItem Content="Windows Authentication"/>
+                        <ComboBoxItem Content="SQL Server Authentication"/>
+                    </ComboBox>
+                    <TextBox x:Name="User" Header="User name"/>
+                    <PasswordBox x:Name="Password" Header="Password"/>
+                    <CheckBox x:Name="Trust" Content="Trust server certificate" IsChecked="True"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Content="Test" Click="Test"/>
+                        <Button Content="Save / edit" Click="Save" Style="{StaticResource AccentButtonStyle}"/>
+                        <Button Content="New" Click="New"/>
+                    </StackPanel>
+                    <InfoBar x:Name="Status" IsOpen="False"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollView>
+</Page>
